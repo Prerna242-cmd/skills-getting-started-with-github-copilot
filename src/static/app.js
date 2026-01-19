@@ -20,14 +20,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const spotsLeft = details.max_participants - details.participants.length;
 
+        const participantsList = details.participants.length > 0
+          ? `<ul>${details.participants.map(p => `<li>${p}</li>`).join("")}</ul>`
+          : "<p class='no-participants'>No participants yet</p>";
+
         activityCard.innerHTML = `
           <h4>${name}</h4>
           <p>${details.description}</p>
           <p><strong>Schedule:</strong> ${details.schedule}</p>
           <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
+          <div class="participants-section">
+            <strong>Participants (${details.participants.length}/${details.max_participants}):</strong>
+            ${participantsList}
+          </div>
         `;
 
-        activitiesList.appendChild(activityCard);
+        // Add delete icon for each participant\n        const deleteIcon = document.createElement('span');\n        deleteIcon.textContent = '🗑️'; // Unicode for trash can\n        deleteIcon.className = 'delete-icon';\n        deleteIcon.onclick = async () => {\n          const confirmDelete = confirm('Are you sure you want to unregister this participant?');\n          if (confirmDelete) {\n            // Call API to unregister participant\n            const unregisterResponse = await fetch(`/activities/${name}/unregister`, {\n              method: 'DELETE',\n              headers: {\n                'Content-Type': 'application/json',\n              },\n              body: JSON.stringify({ email: p }),\n            });\n            if (unregisterResponse.ok) {\n              fetchActivities(); // Refresh activities\n            } else {\n              alert('Failed to unregister participant.');\n            }\n          }\n        };\n        activityCard.appendChild(deleteIcon);\n\n        // Hide bullet points\n        const participantList = activityCard.querySelector('.participants-section ul');\n        if (participantList) {\n          participantList.style.listStyleType = 'none';\n        }\n\n        activitiesList.appendChild(activityCard);
 
         // Add option to select dropdown
         const option = document.createElement("option");
@@ -62,6 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = result.message;
         messageDiv.className = "success";
         signupForm.reset();
+        fetchActivities(); // Refresh activities list to show the new participant
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
